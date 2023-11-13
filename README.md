@@ -1,4 +1,4 @@
-# Hanium_ChatBot2
+# Hanium_ChatBot
 
 ## google-translate API
 <p>
@@ -6,7 +6,7 @@
 </p>
 
 ## Test 결과 
-<img width="490" alt="image" src="https://github.com/gus1043/Hanium_ChatBot2/assets/80878955/37e07828-9bc2-4f23-a164-b85ba13f9f2a">
+<img width="490" alt="image" src="https://github.com/gus1043/Hanium_ChatBot/assets/80878955/37e07828-9bc2-4f23-a164-b85ba13f9f2a">
 
 ## 실제 구현
 POST https://www.googleapis.com/language/translate/v2?

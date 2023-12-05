@@ -7,6 +7,7 @@ const BULB_DEVICE_NUM = process.env.BULB_DEVICE_NUM
 const SMARTTHINGS_KEY = process.env.SMARTTHINGS_KEY
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const MON_DEVICE_NUM = process.env.MON_DEVICE_NUM
+const BLIND_DEVICE_NUM = process.env.BLIND_DEVICE_NUM
 const NLP_KEY = process.env.NLP_KEY
 
 const language = require('@google-cloud/language').v2
@@ -15,6 +16,128 @@ const client = new language.LanguageServiceClient()
 const axios = require('axios')
 
 const apiRouter = require('express').Router()
+
+apiRouter.post('/blind-on', async function (req, res) {
+  // 블라인드 올려 줘 등 텍스트가 들어오면 실행
+
+  db.query(
+    'insert into count2 (date, blindCnt, blindDate) values(CURRENT_DATE, blindCnt+1, now()) on duplicate key update blindCnt = blindCnt+1, blindDate = CURRENT_TIMESTAMP',
+    function (err, results, fields) {
+      if (err) throw err
+      console.log(results)
+    },
+  )
+
+  try {
+    const url = `https://api.smartthings.com/v1/devices/${BLIND_DEVICE_NUM}/commands`
+    const jsonData = {
+      commands: [
+        {
+          component: 'main',
+          capability: 'switch',
+          command: 'on',
+          arguments: [],
+          name: 'on',
+        },
+      ],
+    }
+
+    const options = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${SMARTTHINGS_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData),
+    }
+
+    const response = await fetch(url, options)
+    const data = await response.json()
+
+    const responseBody = {
+      version: '2.0',
+      template: {
+        outputs: [
+          {
+            basicCard: {
+              title: '발표장에 있는 블라인드가 올라갔어요.',
+              thumbnail: {
+                imageUrl:
+                  'https://imgae-bucket.s3.ap-northeast-2.amazonaws.com/up.png',
+              },
+            },
+          },
+        ],
+      },
+    }
+
+    res.status(200).send(responseBody)
+  } catch (error) {
+    console.error('오류가 발생했습니다.', error)
+    res.status(500).send('오류가 발생했습니다.')
+  }
+})
+
+apiRouter.post('/blind-off', async function (req, res) {
+  // 블라인드 내려 줘 등 텍스트가 들어오면 실행
+
+  db.query(
+    'insert into count2 (date, blindCnt, blindDate) values(CURRENT_DATE, blindCnt+1, now()) on duplicate key update blindCnt = blindCnt+1, blindDate = CURRENT_TIMESTAMP',
+    function (err, results, fields) {
+      if (err) throw err
+      console.log(results)
+    },
+  )
+
+  try {
+    const url = `https://api.smartthings.com/v1/devices/${BLIND_DEVICE_NUM}/commands`
+    const jsonData = {
+      commands: [
+        {
+          component: 'main',
+          capability: 'switch',
+          command: 'off',
+          arguments: [],
+          name: 'off',
+        },
+      ],
+    }
+
+    const options = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${SMARTTHINGS_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData),
+    }
+
+    const response = await fetch(url, options)
+    const data = await response.json()
+
+    const responseBody = {
+      version: '2.0',
+      template: {
+        outputs: [
+          {
+            basicCard: {
+              title: '발표장에 있는 블라인드가 내려갔어요.',
+              thumbnail: {
+                imageUrl:
+                  'https://imgae-bucket.s3.ap-northeast-2.amazonaws.com/down.png',
+              },
+            },
+          },
+        ],
+      },
+    }
+
+    res.status(200).send(responseBody)
+  } catch (error) {
+    console.error('오류가 발생했습니다.', error)
+    res.status(500).send('오류가 발생했습니다.')
+  }
+})
 
 apiRouter.post('/controlbulb-on', async function (req, res) {
   // 전등, 전구, 불빛 켜줘 등 텍스트가 들어오면 실행
